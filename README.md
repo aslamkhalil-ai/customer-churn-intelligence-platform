@@ -44,15 +44,15 @@ The application processes the input using the same preprocessing pipeline used d
 ## Project Screenshots
 
 ### Dashboard
-![Dashboard](screenshots/dashboard.png)
-![Dashboard](screenshots/dashboard(2).png)
+![Dashboard](/dashboard.png)
+![Dashboard](/dashboard(2).png)
 
 ### Churn Prediction
-![Prediction](screenshots/prediction.png)
+![Prediction](/prediction.png)
 
 ### Analytics
-![Analytics](screenshots/analytics.png)
-![Analytics](screenshots/analytics(2).png)
+![Analytics](/analytics.png)
+![Analytics](/analytics(2).png)
 
 ### AI Risk Analysis
 
