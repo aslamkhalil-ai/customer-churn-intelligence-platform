@@ -41,6 +41,18 @@ Users can enter:
 * Estimated Salary
 
 The application processes the input using the same preprocessing pipeline used during model training and generates a churn prediction.
+## Project Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/dashboard(2).png)
+
+### Churn Prediction
+![Prediction](screenshots/prediction.png)
+
+### Analytics
+![Analytics](screenshots/analytics.png)
+![Analytics](screenshots/analytics(2).png)
 
 ### AI Risk Analysis
 
