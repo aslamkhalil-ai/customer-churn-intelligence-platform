@@ -1,0 +1,3029 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Churn Intelligence</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 30px;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f7f5f2;
+    color: #20233a;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    bottom: 20px;
+    width: 230px;
+
+    background: linear-gradient(
+        180deg,
+        #fff4ef,
+        #f4efff
+    );
+
+    border-radius: 28px;
+    padding: 30px 18px;
+
+    box-shadow:
+        0 15px 45px rgba(55, 45, 90, 0.10);
+
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 45px;
+    padding-left: 12px;
+}
+
+.logo span {
+    color: #9a6cff;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #5d6074;
+    padding: 14px 16px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.nav a:hover {
+    background: white;
+    color: #7c5cff;
+    transform: translateX(5px);
+}
+
+.nav a.active {
+    background: white;
+    color: #7c5cff;
+
+    box-shadow:
+        0 8px 20px rgba(124, 92, 255, 0.10);
+}
+
+.sidebar-bottom {
+    position: absolute;
+    bottom: 25px;
+    left: 25px;
+    right: 25px;
+
+    font-size: 12px;
+    color: #999aaa;
+    line-height: 1.6;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.main {
+    margin-left: 280px;
+    padding: 45px 50px;
+}
+
+section {
+    min-height: 100vh;
+    padding-top: 30px;
+    padding-bottom: 80px;
+    scroll-margin-top: 20px;
+}
+
+
+/* =========================
+   TITLES
+========================= */
+
+.section-title {
+    margin-bottom: 30px;
+}
+
+.section-title small {
+    color: #8b6cff;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.section-title h2 {
+    font-size: 42px;
+    margin-top: 8px;
+    letter-spacing: -1px;
+}
+
+.section-title p {
+    color: #77798b;
+    margin-top: 10px;
+}
+
+.section-heading {
+    margin-bottom: 35px;
+}
+
+.section-eyebrow {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    color: #7c5cff;
+    margin-bottom: 9px;
+}
+
+.section-heading h2 {
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 8px;
+    color: #252535;
+}
+
+.section-heading p {
+    margin: 0;
+    color: #858797;
+    font-size: 13px;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 22px;
+    padding: 22px;
+
+    box-shadow:
+        0 12px 35px rgba(55,45,90,0.06);
+
+    transition: transform 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    color: #8c8d9d;
+}
+
+.stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eeeaff;
+    color: #7c5cff;
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.stat-icon.danger {
+    background: #ffe8e4;
+    color: #d85b4d;
+}
+
+.stat-icon.success {
+    background: #e3f6eb;
+    color: #399266;
+}
+
+.stat-icon.purple {
+    background: #eee8ff;
+    color: #7c5cff;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 900;
+    color: #29283a;
+    margin-top: 22px;
+}
+
+.stat-description {
+    font-size: 11px;
+    color: #999aaa;
+    margin-top: 6px;
+}
+
+
+/* =========================
+   DASHBOARD CHARTS
+========================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.dashboard-card,
+.analytics-card,
+.insights-section {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 24px;
+    padding: 25px;
+
+    box-shadow:
+        0 12px 35px rgba(55,45,90,0.06);
+}
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card-eyebrow {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    color: #999aaa;
+    margin-bottom: 7px;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #29283a;
+}
+
+.card-badge {
+    background: #f0edff;
+    color: #7c5cff;
+    border-radius: 20px;
+    padding: 7px 11px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.chart-wrapper {
+    height: 270px;
+    position: relative;
+}
+
+.country-card {
+    margin-bottom: 22px;
+}
+
+.country-chart-wrapper {
+    height: 300px;
+    position: relative;
+}
+
+
+/* =========================
+   INSIGHT
+========================= */
+
+.insight-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.insight-number {
+    font-size: 52px;
+    line-height: 1;
+    font-weight: 900;
+    color: #7c5cff;
+    margin-top: 20px;
+}
+
+.insight-text {
+    color: #77798b;
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 15px 0;
+}
+
+.insight-divider {
+    height: 1px;
+    background: rgba(80,75,100,0.08);
+    margin: 8px 0 15px;
+}
+
+.insight-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 0;
+
+    color: #77798b;
+    font-size: 12px;
+}
+
+.insight-row strong {
+    color: #29283a;
+    font-size: 14px;
+}
+
+
+/* =========================
+   PREDICTION
+========================= */
+
+.prediction-wrapper {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 25px;
+}
+
+.form-card {
+    background: white;
+    border-radius: 26px;
+    padding: 30px;
+
+    box-shadow:
+        0 12px 35px rgba(40,35,70,0.07);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #55586d;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 14px 15px;
+
+    border: 1px solid #e7e5ec;
+
+    background: #faf9fc;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    font-size: 14px;
+    color: #303247;
+
+    transition: 0.2s;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #9b82ff;
+    background: white;
+
+    box-shadow:
+        0 0 0 3px rgba(155,130,255,0.10);
+}
+
+.predict-button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 16px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #20233a;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.predict-button:hover {
+    background: #7c5cff;
+    transform: translateY(-2px);
+}
+
+
+/* =========================
+   RESULT
+========================= */
+
+.result-card {
+    background: linear-gradient(
+        145deg,
+        #fff0ea,
+        #eee8ff
+    );
+
+    border-radius: 26px;
+    padding: 35px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-height: 400px;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 35px;
+}
+
+.result-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #858797;
+}
+
+.risk-badge {
+    padding: 7px 12px;
+    border-radius: 30px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.risk-badge.high {
+    background: #ffe1dc;
+    color: #d55345;
+}
+
+.risk-badge.medium {
+    background: #fff0c9;
+    color: #a87900;
+}
+
+.risk-badge.low {
+    background: #def5e7;
+    color: #318957;
+}
+
+.risk-title {
+    font-size: 14px;
+    color: #737587;
+    margin-bottom: 5px;
+}
+
+.probability {
+    font-size: 64px;
+    font-weight: 900;
+
+    color: #7c5cff;
+
+    line-height: 1;
+
+    margin: 12px 0 22px;
+}
+
+.risk-bar {
+    width: 100%;
+    height: 10px;
+
+    background: rgba(255,255,255,0.75);
+
+    border-radius: 20px;
+    overflow: hidden;
+
+    margin-bottom: 8px;
+}
+
+.risk-progress {
+    height: 100%;
+
+    background: #7c5cff;
+
+    border-radius: 20px;
+
+    transition: width 0.8s ease;
+}
+
+.risk-scale {
+    display: flex;
+    justify-content: space-between;
+
+    color: #999aaa;
+    font-size: 10px;
+
+    margin-bottom: 30px;
+}
+
+.prediction-message {
+    background: rgba(255,255,255,0.65);
+
+    border-radius: 16px;
+
+    padding: 18px;
+}
+
+.prediction-message strong {
+    display: block;
+
+    font-size: 15px;
+
+    margin-bottom: 7px;
+}
+
+.prediction-message p {
+    color: #77798b;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+    margin: 0;
+}
+
+.empty-result {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 20px;
+
+    border-radius: 20px;
+
+    background: white;
+    color: #7c5cff;
+
+    font-weight: 900;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.06);
+}
+
+.empty-result h3 {
+    margin-bottom: 10px;
+}
+
+.empty-result p {
+    color: #77798b;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================
+   ANALYTICS
+========================= */
+
+.analytics-section {
+    padding-bottom: 80px;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.analytics-chart {
+    height: 300px;
+    position: relative;
+}
+
+
+/* =========================
+   BUSINESS INSIGHTS
+========================= */
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.business-insight {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+
+    padding: 20px;
+
+    background: rgba(248,247,251,0.8);
+
+    border-radius: 18px;
+}
+
+.business-icon {
+    min-width: 40px;
+    height: 40px;
+
+    border-radius: 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eee8ff;
+
+    color: #7c5cff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.business-insight span {
+    display: block;
+
+    color: #999aaa;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 7px;
+}
+
+.business-insight strong {
+    display: block;
+
+    color: #29283a;
+
+    font-size: 13px;
+
+    margin-bottom: 7px;
+}
+
+.business-insight p {
+    margin: 0;
+
+    color: #77798b;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   CUSTOMERS
+========================= */
+
+.table-card {
+    background: white;
+
+    border-radius: 25px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 12px 35px rgba(40,35,70,0.07);
+
+    overflow-x: auto;
+}
+
+.customer-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.customer-controls input,
+.customer-controls select {
+    padding: 12px 15px;
+
+    border: 1px solid #e7e5ec;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #faf9fc;
+
+    font-size: 14px;
+
+    color: #303247;
+}
+
+.customer-controls input {
+    min-width: 240px;
+}
+
+.customer-controls input:focus,
+.customer-controls select:focus {
+    border-color: #9b82ff;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 3px rgba(155,130,255,0.10);
+}
+
+.filter-button {
+    padding: 12px 18px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #20233a;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.filter-button:hover {
+    background: #7c5cff;
+
+    transform: translateY(-2px);
+}
+
+#customerCount {
+    font-size: 13px;
+
+    color: #898b9a;
+
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 700px;
+}
+
+th {
+    text-align: left;
+
+    color: #8a8c9b;
+
+    font-size: 12px;
+
+    padding: 15px;
+
+    border-bottom:
+        1px solid #eeeef2;
+}
+
+td {
+    padding: 17px 15px;
+
+    font-size: 13px;
+
+    border-bottom:
+        1px solid #f0eff3;
+}
+
+.badge {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.badge-danger {
+    background: #ffe3df;
+
+    color: #d85b4d;
+}
+
+.badge-success {
+    background: #e1f6ea;
+
+    color: #369460;
+}
+
+
+/* =========================
+   PAGINATION
+========================= */
+
+.pagination {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    margin-top: 25px;
+}
+
+.pagination a {
+    text-decoration: none;
+
+    padding: 10px 16px;
+
+    border-radius: 10px;
+
+    background: #20233a;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.pagination a:hover {
+    background: #7c5cff;
+
+    transform: translateY(-2px);
+}
+
+.pagination span {
+    font-size: 13px;
+
+    color: #77798b;
+
+    font-weight: 600;
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+.settings-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 25px;
+}
+
+.card {
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 12px 35px rgba(40,35,70,0.07);
+}
+
+.setting-item {
+    padding: 18px 0;
+
+    border-bottom:
+        1px solid #eeeef2;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item span {
+    display: block;
+
+    color: #9495a3;
+
+    font-size: 12px;
+
+    margin-bottom: 7px;
+}
+
+.setting-item strong {
+    font-size: 15px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1100px) {
+
+    .sidebar {
+        width: 190px;
+    }
+
+    .main {
+        margin-left: 225px;
+        padding: 35px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .prediction-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        position: sticky;
+
+        top: 10px;
+        left: 10px;
+        bottom: auto;
+
+        width: calc(100% - 20px);
+
+        height: auto;
+
+        padding: 15px;
+
+        border-radius: 20px;
+
+        margin-bottom: 20px;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+    }
+
+    .nav {
+        flex-direction: row;
+
+        overflow-x: auto;
+    }
+
+    .nav a {
+        white-space: nowrap;
+    }
+
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+
+        padding: 20px;
+    }
+
+    section {
+        min-height: auto;
+
+        padding-top: 50px;
+
+        padding-bottom: 70px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .section-heading h2 {
+        font-size: 24px;
+    }
+
+    .dashboard-card,
+    .analytics-card,
+    .insights-section,
+    .form-card,
+    .table-card {
+        padding: 18px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Churn<span>AI</span>
+    </div>
+
+    <nav class="nav">
+
+        <a href="#dashboard" class="active">
+            Dashboard
+        </a>
+
+        <a href="#prediction">
+            Prediction
+        </a>
+
+        <a href="#analytics">
+            Analytics
+        </a>
+
+        <a href="#customers">
+            Customers
+        </a>
+
+        <a href="#settings">
+            Settings
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        AI Customer Churn<br>
+        Intelligence Platform
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<section id="dashboard">
+
+    <div class="section-heading">
+
+        <span class="section-eyebrow">
+            BUSINESS OVERVIEW
+        </span>
+
+        <h2>
+            Customer Churn Dashboard
+        </h2>
+
+        <p>
+            Real-time overview of customer retention and churn behavior.
+        </p>
+
+    </div>
+
+
+    <!-- KPI -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <span class="stat-label">
+                    TOTAL CUSTOMERS
+                </span>
+
+                <div class="stat-icon">
+                    TC
+                </div>
+
+            </div>
+
+            <div class="stat-value">
+                {{ total_customers }}
+            </div>
+
+            <div class="stat-description">
+                Customers in dataset
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <span class="stat-label">
+                    CHURNED CUSTOMERS
+                </span>
+
+                <div class="stat-icon danger">
+                    CH
+                </div>
+
+            </div>
+
+            <div class="stat-value">
+                {{ churned_customers }}
+            </div>
+
+            <div class="stat-description">
+                Customers who left
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <span class="stat-label">
+                    STAYED CUSTOMERS
+                </span>
+
+                <div class="stat-icon success">
+                    ST
+                </div>
+
+            </div>
+
+            <div class="stat-value">
+                {{ stayed_customers }}
+            </div>
+
+            <div class="stat-description">
+                Customers retained
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <span class="stat-label">
+                    CHURN RATE
+                </span>
+
+                <div class="stat-icon purple">
+                    CR
+                </div>
+
+            </div>
+
+            <div class="stat-value">
+                {{ churn_rate }}%
+            </div>
+
+            <div class="stat-description">
+                Overall customer churn
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DASHBOARD CHARTS -->
+
+    <div class="dashboard-grid">
+
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        CUSTOMER RETENTION
+                    </span>
+
+                    <h3>
+                        Churn Distribution
+                    </h3>
+
+                </div>
+
+                <span class="card-badge">
+                    OVERVIEW
+                </span>
+
+            </div>
+
+            <div class="chart-wrapper">
+
+                <canvas id="dashboardChurnChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-card insight-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        AI INSIGHT
+                    </span>
+
+                    <h3>
+                        Retention Overview
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="insight-number">
+                {{ churn_rate }}%
+            </div>
+
+            <p class="insight-text">
+
+                of customers in the dataset are classified
+                as churned.
+
+            </p>
+
+            <div class="insight-divider"></div>
+
+            <div class="insight-row">
+
+                <span>
+                    Churned
+                </span>
+
+                <strong>
+                    {{ churned_customers }}
+                </strong>
+
+            </div>
+
+            <div class="insight-row">
+
+                <span>
+                    Stayed
+                </span>
+
+                <strong>
+                    {{ stayed_customers }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- COUNTRY -->
+
+    <div class="dashboard-card country-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-eyebrow">
+                    GEOGRAPHIC ANALYSIS
+                </span>
+
+                <h3>
+                    Churn by Country
+                </h3>
+
+            </div>
+
+            <span class="card-badge">
+                COUNTRY
+            </span>
+
+        </div>
+
+        <div class="country-chart-wrapper">
+
+            <canvas id="dashboardCountryChart"></canvas>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PREDICTION
+===================================================== -->
+
+<section id="prediction">
+
+    <div class="section-title">
+
+        <small>
+            MACHINE LEARNING
+        </small>
+
+        <h2>
+            Churn Prediction
+        </h2>
+
+        <p>
+            Enter customer information to predict their churn probability.
+        </p>
+
+    </div>
+
+
+    <div class="prediction-wrapper">
+
+
+        <!-- FORM -->
+
+        <div class="form-card">
+
+            <form
+                method="POST"
+                action="#prediction"
+            >
+
+                <div class="form-grid">
+
+
+                    <div class="field">
+
+                        <label>
+                            Credit Score
+                        </label>
+
+                        <input
+                            type="number"
+                            name="credit_score"
+                            placeholder="650"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Country
+                        </label>
+
+                        <select
+                            name="country"
+                            required
+                        >
+
+                            <option value="">
+                                Select Country
+                            </option>
+
+                            <option value="France">
+                                France
+                            </option>
+
+                            <option value="Spain">
+                                Spain
+                            </option>
+
+                            <option value="Germany">
+                                Germany
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Gender
+                        </label>
+
+                        <select
+                            name="gender"
+                            required
+                        >
+
+                            <option value="">
+                                Select Gender
+                            </option>
+
+                            <option value="Male">
+                                Male
+                            </option>
+
+                            <option value="Female">
+                                Female
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Age
+                        </label>
+
+                        <input
+                            type="number"
+                            name="age"
+                            placeholder="35"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Tenure
+                        </label>
+
+                        <input
+                            type="number"
+                            name="tenure"
+                            placeholder="5"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Balance
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="balance"
+                            placeholder="50000"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Products Number
+                        </label>
+
+                        <input
+                            type="number"
+                            name="products_number"
+                            placeholder="2"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Credit Card
+                        </label>
+
+                        <select
+                            name="credit_card"
+                            required
+                        >
+
+                            <option value="1">
+                                Yes
+                            </option>
+
+                            <option value="0">
+                                No
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Active Member
+                        </label>
+
+                        <select
+                            name="active_member"
+                            required
+                        >
+
+                            <option value="1">
+                                Yes
+                            </option>
+
+                            <option value="0">
+                                No
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Estimated Salary
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="estimated_salary"
+                            placeholder="75000"
+                            required
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="predict-button"
+                >
+                    Predict Customer Churn
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div class="result-card">
+
+            <div class="result-header">
+
+                <span class="result-label">
+                    AI RISK ANALYSIS
+                </span>
+
+                {% if prediction is not none %}
+
+                    {% if risk_level == "HIGH RISK" %}
+
+                        <span class="risk-badge high">
+                            HIGH RISK
+                        </span>
+
+                    {% elif risk_level == "MEDIUM RISK" %}
+
+                        <span class="risk-badge medium">
+                            MEDIUM RISK
+                        </span>
+
+                    {% else %}
+
+                        <span class="risk-badge low">
+                            LOW RISK
+                        </span>
+
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+
+            {% if prediction is not none %}
+
+                <div class="risk-title">
+                    Churn Probability
+                </div>
+
+                <div class="probability">
+                    {{ probability }}%
+                </div>
+
+                <div class="risk-bar">
+
+                    <div
+                        class="risk-progress"
+                        style="width: {{ probability }}%;"
+                    ></div>
+
+                </div>
+
+                <div class="risk-scale">
+
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+
+                </div>
+
+
+                <div class="prediction-message">
+
+                    {% if prediction == 1 %}
+
+                        <strong>
+                            Customer likely to churn
+                        </strong>
+
+                        <p>
+                            The model identifies this customer
+                            as having a higher probability of leaving.
+                        </p>
+
+                    {% else %}
+
+                        <strong>
+                            Customer likely to stay
+                        </strong>
+
+                        <p>
+                            The model identifies this customer
+                            as having a lower probability of leaving.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-result">
+
+                    <div class="empty-icon">
+                        AI
+                    </div>
+
+                    <h3>
+                        Ready for Prediction
+                    </h3>
+
+                    <p>
+                        Enter customer information on the left
+                        to generate an AI-powered churn analysis.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ANALYTICS
+===================================================== -->
+
+<section id="analytics" class="analytics-section">
+
+    <div class="section-heading">
+
+        <span class="section-eyebrow">
+            MACHINE LEARNING ANALYTICS
+        </span>
+
+        <h2>
+            Customer Behavior Analytics
+        </h2>
+
+        <p>
+            Explore customer churn patterns across demographics,
+            age groups and account activity.
+        </p>
+
+    </div>
+
+
+    <!-- ROW 1 -->
+
+    <div class="analytics-grid">
+
+
+        <!-- GENDER -->
+
+        <div class="analytics-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        DEMOGRAPHIC ANALYSIS
+                    </span>
+
+                    <h3>
+                        Churn by Gender
+                    </h3>
+
+                </div>
+
+                <span class="card-badge">
+                    GENDER
+                </span>
+
+            </div>
+
+            <div class="analytics-chart">
+
+                <canvas id="genderChurnChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE -->
+
+        <div class="analytics-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        CUSTOMER ACTIVITY
+                    </span>
+
+                    <h3>
+                        Active vs Inactive
+                    </h3>
+
+                </div>
+
+                <span class="card-badge">
+                    ACTIVITY
+                </span>
+
+            </div>
+
+            <div class="analytics-chart">
+
+                <canvas id="activeChurnChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ROW 2 -->
+
+    <div class="analytics-grid">
+
+
+        <!-- AGE -->
+
+        <div class="analytics-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        AGE ANALYSIS
+                    </span>
+
+                    <h3>
+                        Churn by Age Group
+                    </h3>
+
+                </div>
+
+                <span class="card-badge">
+                    AGE
+                </span>
+
+            </div>
+
+            <div class="analytics-chart">
+
+                <canvas id="ageChurnChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- PRODUCTS -->
+
+        <div class="analytics-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        PRODUCT ANALYSIS
+                    </span>
+
+                    <h3>
+                        Churn by Products
+                    </h3>
+
+                </div>
+
+                <span class="card-badge">
+                    PRODUCTS
+                </span>
+
+            </div>
+
+            <div class="analytics-chart">
+
+                <canvas id="productsChurnChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- BUSINESS INSIGHTS -->
+
+    <div class="insights-section">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-eyebrow">
+                    BUSINESS INTELLIGENCE
+                </span>
+
+                <h3>
+                    Key Customer Insights
+                </h3>
+
+            </div>
+
+            <span class="card-badge">
+                AI ANALYSIS
+            </span>
+
+        </div>
+
+
+        <div class="insights-grid">
+
+
+            <div class="business-insight">
+
+                <div class="business-icon">
+                    G
+                </div>
+
+                <div>
+
+                    <span>
+                        GENDER ANALYSIS
+                    </span>
+
+                    <strong>
+                        Customer churn by gender
+                    </strong>
+
+                    <p>
+                        Compare churn volume between male
+                        and female customers.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="business-insight">
+
+                <div class="business-icon">
+                    A
+                </div>
+
+                <div>
+
+                    <span>
+                        ACTIVITY ANALYSIS
+                    </span>
+
+                    <strong>
+                        Active member behavior
+                    </strong>
+
+                    <p>
+                        Analyze how customer activity relates
+                        to churn behavior.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="business-insight">
+
+                <div class="business-icon">
+                    R
+                </div>
+
+                <div>
+
+                    <span>
+                        RETENTION
+                    </span>
+
+                    <strong>
+                        Retention monitoring
+                    </strong>
+
+                    <p>
+                        Use churn patterns to identify areas
+                        requiring retention attention.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CUSTOMERS
+===================================================== -->
+
+<section id="customers">
+
+    <div class="section-title">
+
+        <small>
+            CUSTOMER DATABASE
+        </small>
+
+        <h2>
+            Customers
+        </h2>
+
+        <p>
+            Search and filter customer records.
+        </p>
+
+    </div>
+
+
+    <div class="table-card">
+
+
+        <form
+            method="GET"
+            action="/#customers"
+            class="customer-controls"
+        >
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search customer..."
+                value="{{ search }}"
+            >
+
+
+            <select name="country">
+
+                <option value="">
+                    All Countries
+                </option>
+
+                <option
+                    value="France"
+                    {% if country == "France" %}selected{% endif %}
+                >
+                    France
+                </option>
+
+                <option
+                    value="Germany"
+                    {% if country == "Germany" %}selected{% endif %}
+                >
+                    Germany
+                </option>
+
+                <option
+                    value="Spain"
+                    {% if country == "Spain" %}selected{% endif %}
+                >
+                    Spain
+                </option>
+
+            </select>
+
+
+            <select name="status">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option
+                    value="1"
+                    {% if status == "1" %}selected{% endif %}
+                >
+                    Churned
+                </option>
+
+                <option
+                    value="0"
+                    {% if status == "0" %}selected{% endif %}
+                >
+                    Active
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                Search
+            </button>
+
+        </form>
+
+
+        <p id="customerCount">
+            Showing {{ total_filtered }} customers
+        </p>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Customer ID
+                    </th>
+
+                    <th>
+                        Country
+                    </th>
+
+                    <th>
+                        Age
+                    </th>
+
+                    <th>
+                        Balance
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for customer in customers %}
+
+                    <tr>
+
+                        <td>
+                            {{ customer.customer_id }}
+                        </td>
+
+                        <td>
+                            {{ customer.country }}
+                        </td>
+
+                        <td>
+                            {{ customer.age }}
+                        </td>
+
+                        <td>
+                            ${{ "{:,.0f}".format(customer.balance) }}
+                        </td>
+
+                        <td>
+
+                            {% if customer.churn == 1 %}
+
+                                <span class="badge badge-danger">
+                                    Churned
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-success">
+                                    Active
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+
+                {% if not customers %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            style="
+                                text-align:center;
+                                padding:30px;
+                                color:#999aaa;
+                            "
+                        >
+                            No customers found.
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+
+        <div class="pagination">
+
+            {% if page > 1 %}
+
+                <a
+                    href="?page={{ page - 1 }}&search={{ search|urlencode }}&country={{ country|urlencode }}&status={{ status|urlencode }}#customers"
+                >
+                    ← Previous
+                </a>
+
+            {% endif %}
+
+
+            <span>
+                Page {{ page }} of {{ total_pages }}
+            </span>
+
+
+            {% if page < total_pages %}
+
+                <a
+                    href="?page={{ page + 1 }}&search={{ search|urlencode }}&country={{ country|urlencode }}&status={{ status|urlencode }}#customers"
+                >
+                    Next →
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SETTINGS
+===================================================== -->
+
+<section id="settings">
+
+    <div class="section-title">
+
+        <small>
+            SYSTEM
+        </small>
+
+        <h2>
+            Settings
+        </h2>
+
+        <p>
+            Information about this application.
+        </p>
+
+    </div>
+
+
+    <div class="settings-grid">
+
+
+        <div class="card">
+
+            <div class="setting-item">
+
+                <span>
+                    Application
+                </span>
+
+                <strong>
+                    AI Customer Churn Intelligence
+                </strong>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <span>
+                    Model
+                </span>
+
+                <strong>
+                    churn_model (1).joblib
+                </strong>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <span>
+                    Framework
+                </span>
+
+                <strong>
+                    Flask
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="setting-item">
+
+                <span>
+                    Machine Learning
+                </span>
+
+                <strong>
+                    Scikit-learn
+                </strong>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <span>
+                    Prediction Type
+                </span>
+
+                <strong>
+                    Customer Churn Classification
+                </strong>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <span>
+                    Status
+                </span>
+
+                <strong>
+                    System Ready
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+/* =====================================================
+   DASHBOARD - CHURN DISTRIBUTION
+===================================================== */
+
+const dashboardChurnCanvas =
+    document.getElementById("dashboardChurnChart");
+
+if (dashboardChurnCanvas) {
+
+    new Chart(dashboardChurnCanvas, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: [
+                "Stayed",
+                "Churned"
+            ],
+
+            datasets: [{
+
+                data: [
+                    {{ stayed_customers }},
+                    {{ churned_customers }}
+                ],
+
+                borderWidth: 0
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            cutout: "72%",
+
+            plugins: {
+
+                legend: {
+
+                    position: "bottom",
+
+                    labels: {
+
+                        padding: 20,
+
+                        usePointStyle: true,
+
+                        font: {
+                            size: 11
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   DASHBOARD - COUNTRY
+===================================================== */
+
+const dashboardCountryCanvas =
+    document.getElementById("dashboardCountryChart");
+
+if (dashboardCountryCanvas) {
+
+    new Chart(dashboardCountryCanvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                {% for country_name in country_churn.keys() %}
+                    "{{ country_name }}"{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+
+            datasets: [{
+
+                label: "Churned Customers",
+
+                data: [
+                    {% for value in country_churn.values() %}
+                        {{ value }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+
+                borderRadius: 8,
+
+                borderSkipped: false
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    grid: {
+                        color: "rgba(100,90,130,0.08)"
+                    }
+
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   ANALYTICS - GENDER
+===================================================== */
+
+const genderChurnCanvas =
+    document.getElementById("genderChurnChart");
+
+if (genderChurnCanvas) {
+
+    new Chart(genderChurnCanvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                {% for gender_name in gender_churn.keys() %}
+                    "{{ gender_name }}"{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+
+            datasets: [{
+
+                label: "Churned Customers",
+
+                data: [
+                    {% for value in gender_churn.values() %}
+                        {{ value }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+
+                borderRadius: 10,
+
+                borderSkipped: false
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true
+                },
+
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   ANALYTICS - ACTIVE VS INACTIVE
+===================================================== */
+
+const activeChurnCanvas =
+    document.getElementById("activeChurnChart");
+
+if (activeChurnCanvas) {
+
+    new Chart(activeChurnCanvas, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: [
+                "Inactive",
+                "Active"
+            ],
+
+            datasets: [{
+
+                data: [
+                    {{ active_churn.get(0, 0) }},
+                    {{ active_churn.get(1, 0) }}
+                ],
+
+                borderWidth: 0
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            cutout: "68%",
+
+            plugins: {
+
+                legend: {
+
+                    position: "bottom",
+
+                    labels: {
+
+                        padding: 20,
+
+                        usePointStyle: true,
+
+                        font: {
+                            size: 11
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   ANALYTICS - AGE GROUP
+===================================================== */
+
+const ageChurnCanvas =
+    document.getElementById("ageChurnChart");
+
+if (ageChurnCanvas) {
+
+    new Chart(ageChurnCanvas, {
+
+        type: "line",
+
+        data: {
+
+            labels: [
+                {% for age_group in age_churn.keys() %}
+                    "{{ age_group }}"{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+
+            datasets: [{
+
+                label: "Churned Customers",
+
+                data: [
+                    {% for value in age_churn.values() %}
+                        {{ value }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+
+                borderWidth: 3,
+
+                tension: 0.35,
+
+                fill: false,
+
+                pointRadius: 5
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   ANALYTICS - PRODUCTS
+===================================================== */
+
+const productsChurnCanvas =
+    document.getElementById("productsChurnChart");
+
+if (productsChurnCanvas) {
+
+    new Chart(productsChurnCanvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                {% for product_number in products_churn.keys() %}
+                    "{{ product_number }}"{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+
+            datasets: [{
+
+                label: "Churned Customers",
+
+                data: [
+                    {% for value in products_churn.values() %}
+                        {{ value }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+
+                borderRadius: 10,
+
+                borderSkipped: false
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    },
+
+                    title: {
+
+                        display: true,
+
+                        text: "Number of Products"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   SIDEBAR ACTIVE SECTION
+===================================================== */
+
+const sections =
+    document.querySelectorAll("section");
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+
+window.addEventListener(
+    "scroll",
+    function() {
+
+        let current = "";
+
+        sections.forEach(
+            function(section) {
+
+                const sectionTop =
+                    section.offsetTop;
+
+                if (
+                    window.scrollY >=
+                    sectionTop - 250
+                ) {
+
+                    current =
+                        section.getAttribute("id");
+
+                }
+
+            }
+        );
+
+
+        navLinks.forEach(
+            function(link) {
+
+                link.classList.remove("active");
+
+                if (
+                    link.getAttribute("href") ===
+                    "#" + current
+                ) {
+
+                    link.classList.add("active");
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =====================================================
+   SMOOTH NAVIGATION
+===================================================== */
+
+navLinks.forEach(
+    function(link) {
+
+        link.addEventListener(
+            "click",
+            function(event) {
+
+                event.preventDefault();
+
+                const targetId =
+                    this.getAttribute("href");
+
+                const target =
+                    document.querySelector(targetId);
+
+                if (target) {
+
+                    target.scrollIntoView({
+
+                        behavior: "smooth",
+
+                        block: "start"
+
+                    });
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
+
